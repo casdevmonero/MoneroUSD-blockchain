@@ -1,0 +1,11 @@
+/Users/Robert/MoneroUSD/haven-main/external/fcmp_ffi/target/release/deps/std_shims-8da819c7b48aafa8.d: /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/lib.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/sync.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/collections.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/io.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/../README.md
+
+/Users/Robert/MoneroUSD/haven-main/external/fcmp_ffi/target/release/deps/libstd_shims-8da819c7b48aafa8.rlib: /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/lib.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/sync.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/collections.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/io.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/../README.md
+
+/Users/Robert/MoneroUSD/haven-main/external/fcmp_ffi/target/release/deps/libstd_shims-8da819c7b48aafa8.rmeta: /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/lib.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/sync.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/collections.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/io.rs /Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/../README.md
+
+/Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/lib.rs:
+/Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/sync.rs:
+/Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/collections.rs:
+/Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/io.rs:
+/Users/Robert/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/std-shims-0.1.5/src/../README.md:

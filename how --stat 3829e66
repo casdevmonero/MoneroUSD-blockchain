@@ -1,0 +1,131 @@
+commit eab1a78c18210c3d54fb13ea2ca132c85ced7d25 (HEAD -> master)
+Author: casdevmonero <casdevmonero@users.noreply.github.com>
+Date:   Fri Apr 3 20:43:40 2026 +0530
+
+    chore: remove build artifacts from tracking, update .gitignore
+
+ .gitignore                                         |    3 +
+ build-linux/CTestTestfile.cmake                    |   10 -
+ build-linux/Makefile                               | 1586 --------------------
+ build-linux/contrib/CTestTestfile.cmake            |    7 -
+ build-linux/contrib/Makefile                       |  200 ---
+ build-linux/contrib/epee/CTestTestfile.cmake       |    7 -
+ build-linux/contrib/epee/Makefile                  |  200 ---
+ build-linux/contrib/epee/src/CTestTestfile.cmake   |    6 -
+ build-linux/contrib/epee/src/Makefile              |  905 -----------
+ build-linux/external/CTestTestfile.cmake           |   11 -
+ build-linux/external/Makefile                      |  200 ---
+ .../external/db_drivers/CTestTestfile.cmake        |    7 -
+ build-linux/external/db_drivers/Makefile           |  200 ---
+ .../db_drivers/liblmdb/CTestTestfile.cmake         |    6 -
+ build-linux/external/db_drivers/liblmdb/Makefile   |  269 ----
+ .../external/easylogging++/CTestTestfile.cmake     |    6 -
+ build-linux/external/easylogging++/Makefile        |  242 ---
+ .../miniupnp/miniupnpc/CTestTestfile.cmake         |    6 -
+ build-linux/external/miniupnp/miniupnpc/Makefile   | 1100 --------------
+ .../external/miniupnp/miniupnpc/libminiupnpc.so.17 |    1 -
+ .../miniupnp/miniupnpc/libminiupnpc.so.2.2.1       |  Bin 76392 -> 0 bytes
+ .../external/miniupnp/miniupnpc/listdevices        |  Bin 19352 -> 0 bytes
+ .../external/miniupnp/miniupnpc/minixmlvalid       |  Bin 19168 -> 0 bytes
+ .../miniupnp/miniupnpc/testaddr_is_reserved        |  Bin 18848 -> 0 bytes
+ .../external/miniupnp/miniupnpc/testigddescparse   |  Bin 74552 -> 0 bytes
+ .../external/miniupnp/miniupnpc/testminiwget       |  Bin 70136 -> 0 bytes
+ .../external/miniupnp/miniupnpc/testminixml        |  Bin 19136 -> 0 bytes
+ .../external/miniupnp/miniupnpc/testupnpreplyparse |  Bin 19768 -> 0 bytes
+ .../external/miniupnp/miniupnpc/upnpc-shared       |  Bin 37288 -> 0 bytes
+ .../external/miniupnp/miniupnpc/upnpc-static       |  Bin 87304 -> 0 bytes
+ build-linux/external/qrcodegen/CTestTestfile.cmake |    6 -
+ build-linux/external/qrcodegen/Makefile            |  242 ---
+ build-linux/external/randomx/CTestTestfile.cmake   |    6 -
+ build-linux/external/randomx/Makefile              | 1070 -------------
+ .../generate_translations_header-build             |    0
+ .../generate_translations_header-configure         |    0
+ .../generate_translations_header-done              |    0
+ .../generate_translations_header-download          |    0
+ .../generate_translations_header-install           |    0
+ .../generate_translations_header-mkdir             |    0
+ .../generate_translations_header-patch             |    0
+ .../generate_translations_header-patch-info.txt    |    6 -
+ ...generate_translations_header-source_dirinfo.txt |    9 -
+ .../generate_translations_header-update            |    0
+ .../generate_translations_header-update-info.txt   |    7 -
+ build-linux/generated_include/crypto/wallet/ops.h  |   32 -
+ build-linux/monero_crypto_src/CTestTestfile.cmake  |    7 -
+ build-linux/monero_crypto_src/Makefile             |  200 ---
+ .../monero_crypto_src/amd64/CTestTestfile.cmake    |    6 -
+ build-linux/monero_crypto_src/amd64/Makefile       | 1454 ------------------
+ build-linux/src/CTestTestfile.cmake                |   33 -
+ build-linux/src/Makefile                           |  272 ----
+ build-linux/src/blockchain_db/CTestTestfile.cmake  |    6 -
+ build-linux/src/blockchain_db/Makefile             |  284 ----
+ .../src/blockchain_utilities/CTestTestfile.cmake   |    6 -
+ build-linux/src/blockchain_utilities/Makefile      |  638 --------
+ build-linux/src/blocks/CTestTestfile.cmake         |    6 -
+ build-linux/src/blocks/Makefile                    |  338 -----
+ build-linux/src/blocks/blocks_generator.cmake      |   10 -
+ build-linux/src/blocks/generated_checkpoints.c     |    6 -
+ build-linux/src/blocks/generated_stagenet_blocks.c |    6 -
+ build-linux/src/blocks/generated_testnet_blocks.c  |    6 -
+ build-linux/src/checkpoints/CTestTestfile.cmake    |    6 -
+ build-linux/src/checkpoints/Makefile               |  257 ----
+ build-linux/src/common/CTestTestfile.cmake         |    6 -
+ build-linux/src/common/Makefile                    |  743 ---------
+ build-linux/src/crypto/CTestTestfile.cmake         |    7 -
+ build-linux/src/crypto/Makefile                    |  905 -----------
+ build-linux/src/crypto/wallet/CTestTestfile.cmake  |    6 -
+ build-linux/src/crypto/wallet/Makefile             |  200 ---
+ .../src/cryptonote_basic/CTestTestfile.cmake       |    6 -
+ build-linux/src/cryptonote_basic/Makefile          |  503 -------
+ .../src/cryptonote_core/CTestTestfile.cmake        |    6 -
+ build-linux/src/cryptonote_core/Makefile           |  392 -----
+ .../src/cryptonote_protocol/CTestTestfile.cmake    |    6 -
+ build-linux/src/cryptonote_protocol/Makefile       |  311 ----
+ build-linux/src/daemon/CTestTestfile.cmake         |    6 -
+ build-linux/src/daemon/Makefile                    |  377 -----
+ build-linux/src/daemonizer/CTestTestfile.cmake     |    6 -
+ build-linux/src/daemonizer/Makefile                |  257 ----
+ build-linux/src/device/CTestTestfile.cmake         |    6 -
+ build-linux/src/device/Makefile                    |  365 -----
+ build-linux/src/device_trezor/CTestTestfile.cmake  |    6 -
+ build-linux/src/device_trezor/Makefile             |  473 ------
+ build-linux/src/gen_multisig/CTestTestfile.cmake   |    6 -
+ build-linux/src/gen_multisig/Makefile              |  242 ---
+ build-linux/src/gen_ssl_cert/CTestTestfile.cmake   |    6 -
+ build-linux/src/gen_ssl_cert/Makefile              |  242 ---
+ build-linux/src/hardforks/CTestTestfile.cmake      |    6 -
+ build-linux/src/hardforks/Makefile                 |  257 ----
+ build-linux/src/lmdb/CTestTestfile.cmake           |    6 -
+ build-linux/src/lmdb/Makefile                      |  338 -----
+ build-linux/src/mnemonics/CTestTestfile.cmake      |    6 -
+ build-linux/src/mnemonics/Makefile                 |  257 ----
+ build-linux/src/multisig/CTestTestfile.cmake       |    6 -
+ build-linux/src/multisig/Makefile                  |  392 -----
+ build-linux/src/net/CTestTestfile.cmake            |    6 -
+ build-linux/src/net/Makefile                       |  500 ------
+ build-linux/src/offshore/CTestTestfile.cmake       |    6 -
+ build-linux/src/offshore/Makefile                  |  257 ----
+ build-linux/src/p2p/CTestTestfile.cmake            |    6 -
+ build-linux/src/p2p/Makefile                       |  284 ----
+ build-linux/src/ringct/CTestTestfile.cmake         |    6 -
+ build-linux/src/ringct/Makefile                    |  464 ------
+ build-linux/src/rpc/CTestTestfile.cmake            |    6 -
+ build-linux/src/rpc/Makefile                       |  731 ---------
+ build-linux/src/serialization/CTestTestfile.cmake  |    6 -
+ build-linux/src/serialization/Makefile             |  257 ----
+ build-linux/src/simplewallet/CTestTestfile.cmake   |    6 -
+ build-linux/src/simplewallet/Makefile              |  242 ---
+ build-linux/src/wallet/CTestTestfile.cmake         |    7 -
+ build-linux/src/wallet/Makefile                    |  461 ------
+ build-linux/src/wallet/api/CTestTestfile.cmake     |    6 -
+ build-linux/src/wallet/api/Makefile                |  527 -------
+ build-linux/test-protobuf.pb.cc                    |  302 ----
+ build-linux/test-protobuf.pb.h                     |  317 ----
+ build-linux/translations/ImportExecutables.cmake   |   63 -
+ build-linux/translations/Makefile                  |  181 ---
+ .../translations/generate_translations_header      |  Bin 17080 -> 0 bytes
+ build-linux/translations/translation_files.h       |   24 -
+ build-linux/version.cpp                            |   15 -
+ build-vps/CTestTestfile.cmake                      |   10 -
+ build-vps/Makefile                                 | 1572 -------------------
+ build-vps/contrib/CTestTestfile.cmake              |    7 -
+ buil

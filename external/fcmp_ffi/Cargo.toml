@@ -1,0 +1,23 @@
+[package]
+name = "fcmp_ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+monero-fcmp-plus-plus = { path = "../../../external/monero-oxide-fcmp/monero-oxide/ringct/fcmp++", default-features = true }
+fcmps = { package = "full-chain-membership-proofs", path = "../../../external/monero-oxide-fcmp/crypto/fcmps", default-features = true }
+helioselene = { path = "../../../external/monero-oxide-fcmp/crypto/helioselene", default-features = true }
+monero-generators = { path = "../../../external/monero-oxide-fcmp/monero-oxide/generators", default-features = true }
+ciphersuite = { version = "0.4", default-features = true }
+dalek-ff-group = { version = "0.5", default-features = true }
+multiexp = { version = "0.4", default-features = true }
+generalized-bulletproofs = { path = "../../../external/monero-oxide-fcmp/crypto/generalized-bulletproofs", default-features = true }
+ec-divisors = { path = "../../../external/monero-oxide-fcmp/crypto/divisors", default-features = true }
+rand_core = "0.6"
+rand_chacha = "0.3"
+
+[profile.release]
+lto = false
