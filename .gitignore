@@ -128,3 +128,50 @@ src/cryptonote_core/extended_validation.cpp
 build-linux/
 build-vps/
 stagenet-data/
+
+# === SENSITIVE DATA - NEVER COMMIT ===
+# Wallet files and keys
+*.keys
+*.wallet
+*.seed
+*.mnemonic
+*.shared-ringdb/
+
+# Certificates and private keys
+*.pem
+*.p12
+*.crt
+*.key
+rpc_ssl.*
+
+# Environment and secrets
+.env
+.env.*
+*.secret
+*.credentials
+*_credentials*
+*_token*
+
+# Runtime data
+*.pid
+*.mdb
+*.lmdb
+
+# Session and auth data
+.claude/
+.claude.json
+.config/gh/
+
+# Build artifacts
+build-linux/
+build-vps/
+build/
+target/
+
+# Staging/test chain data
+stagenet-data/
+testnet-data/
+*.dat
+
+# Backup files with potential secrets
+*.bak
