@@ -92,45 +92,42 @@ namespace cryptonote {
     }
 #endif
 
-    // -------------------------------------------------------------------
-    // EMISSION DISABLED — block reward is zero until reserve wallets hold
-    // enough BTC/XMR liquidity to absorb miner selling pressure without
-    // breaking the $1 peg.  When reserves are ready, replace this block
-    // with the fee-volume-based emission model below.
-    //
-    // To re-enable, uncomment the fee-volume emission code and remove
-    // the early return.  The fee-volume model ties emission to real
-    // on-chain demand so reserves always grow faster than dilution.
-    // -------------------------------------------------------------------
-    (void)recent_fee_total;  // suppress unused-parameter warning
-    reward = 0;
-    return true;
-
-    // --- Fee-volume-based dynamic emission (DISABLED) ---
+    // --- Fee-volume-based dynamic emission ---
     // Emission scales with on-chain transaction fee volume: miners earn a
     // conservative fraction (25%) of the average fee per block over the last
     // EMISSION_FEE_WINDOW blocks (~1 day).  When there are no fees (e.g. at
     // launch) emission is zero, so no USDm is created without real demand.
     //
-    // Why this guarantees >150% collateralization:
+    // Reserve safety: total mined emission is capped at 2% of the premine.
+    // Since USDm primarily enters circulation via the swap mint mechanism
+    // (backed 1:1 by BTC/XMR deposits), mining emission is kept minimal
+    // to incentivize miners without endangering the $1 peg.
+    //
+    // Why this preserves >150% collateralization:
     //   - On-chain tx fees are tiny (0.01+ USDm each).
     //   - Swap fees (0.5%) generate ~800x more reserve value per USDm of
     //     on-chain fee volume.  80% of swap fees go directly to reserves.
-    //   - So reserves always grow far faster than emission-induced dilution.
+    //   - Total mining emission is hard-capped.
     //   - If fee activity drops, emission drops proportionally to zero.
-    //
-    // if (recent_fee_total == 0) {
-    //   reward = 0;
-    //   return true;
-    // }
-    //
-    // uint64_t base_reward = (recent_fee_total / EMISSION_FEE_WINDOW)
-    //                        * EMISSION_FEE_RATIO_NUM / EMISSION_FEE_RATIO_DEN;
-    // if (base_reward > MAX_EMISSION_PER_BLOCK) {
-    //   base_reward = MAX_EMISSION_PER_BLOCK;
-    // }
 
-    uint64_t base_reward = 0;
+    // Reserve safety cap: stop emission once total mined exceeds 2% of premine
+    const uint64_t EMISSION_CAP = PREMINE_AMOUNT_USDM / 50; // 2% of premine
+    const uint64_t total_mined_emission = (already_generated_coins > PREMINE_AMOUNT_USDM)
+                                          ? (already_generated_coins - PREMINE_AMOUNT_USDM)
+                                          : 0;
+    if (total_mined_emission >= EMISSION_CAP) {
+      reward = 0;
+      return true;
+    }
+
+    // Fixed 0.1 USDm per block. The mining gate in server.js routes this
+    // reward to MINER_ADDRESS only when the mining treasury (funded by 1%
+    // of each swap) has >= $0.15 available. Otherwise routes to burn address.
+    uint64_t base_reward = MAX_EMISSION_PER_BLOCK; // 0.1 USDm
+    const uint64_t remaining_cap = EMISSION_CAP - total_mined_emission;
+    if (base_reward > remaining_cap) {
+      base_reward = remaining_cap;
+    }
 
     // Apply standard CryptoNote block-weight penalty for oversized blocks.
     uint64_t full_reward_zone = get_min_block_weight(version);

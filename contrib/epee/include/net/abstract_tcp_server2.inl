@@ -165,7 +165,9 @@ namespace net_utils
     if (m_state.timers.general.wait_expire)
       return;
     m_state.timers.general.wait_expire = true;
-    auto self = connection<T>::shared_from_this();
+    boost::shared_ptr<connection<T>> self;
+    try { self = connection<T>::shared_from_this(); }
+    catch (const boost::bad_weak_ptr&) { return; }
     m_timers.general.async_wait([this, self](const ec_t & ec){
       std::lock_guard<std::mutex> guard(m_state.lock);
       m_state.timers.general.wait_expire = false;
@@ -206,7 +208,9 @@ namespace net_utils
       epee::net_utils::get_ssl_magic_size() <= sizeof(m_state.data.read.buffer),
       ""
     );
-    auto self = connection<T>::shared_from_this();
+    boost::shared_ptr<connection<T>> self;
+    try { self = connection<T>::shared_from_this(); }
+    catch (const boost::bad_weak_ptr&) { return; }
     if (!m_state.ssl.forced && !m_state.ssl.detected) {
       m_state.socket.wait_read = true;
       boost::asio::async_read(
@@ -313,7 +317,9 @@ namespace net_utils
     ) {
       return;
     }
-    auto self = connection<T>::shared_from_this();
+    boost::shared_ptr<connection<T>> self;
+    try { self = connection<T>::shared_from_this(); }
+    catch (const boost::bad_weak_ptr&) { return; }
     if (m_connection_type != e_connection_type_RPC) {
       auto calc_duration = []{
         CRITICAL_REGION_LOCAL(
@@ -439,7 +445,9 @@ namespace net_utils
     ) {
       return;
     }
-    auto self = connection<T>::shared_from_this();
+    boost::shared_ptr<connection<T>> self;
+    try { self = connection<T>::shared_from_this(); }
+    catch (const boost::bad_weak_ptr&) { return; }
     if (m_connection_type != e_connection_type_RPC) {
       auto calc_duration = [this]{
         CRITICAL_REGION_LOCAL(
@@ -547,7 +555,9 @@ namespace net_utils
   {
     if (m_state.socket.wait_shutdown)
       return;
-    auto self = connection<T>::shared_from_this();
+    boost::shared_ptr<connection<T>> self;
+    try { self = connection<T>::shared_from_this(); }
+    catch (const boost::bad_weak_ptr&) { return; }
     m_state.socket.wait_shutdown = true;
     auto on_shutdown = [this, self](const ec_t &ec){
       std::lock_guard<std::mutex> guard(m_state.lock);
@@ -1062,7 +1072,9 @@ namespace net_utils
     std::lock_guard<std::mutex> guard(m_state.lock);
     if (m_state.status != status_t::RUNNING)
       return false;
-    auto self = connection<T>::shared_from_this();
+    boost::shared_ptr<connection<T>> self;
+    try { self = connection<T>::shared_from_this(); }
+    catch (const boost::bad_weak_ptr&) { return false; }
     ++m_state.protocol.wait_callback;
     boost::asio::post(connection_basic::strand_,[this, self]{
       m_handler.handle_qued_callback();
@@ -1092,7 +1104,7 @@ namespace net_utils
       ++m_state.protocol.reference_counter;
       return true;
     }
-    catch (boost::bad_weak_ptr &exception) {
+    catch (const boost::bad_weak_ptr&) {
       return false;
     }
   }

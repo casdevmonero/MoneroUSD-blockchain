@@ -65,8 +65,10 @@ NodeRPCProxy::NodeRPCProxy(epee::net_utils::http::abstract_http_client &http_cli
 void NodeRPCProxy::invalidate()
 {
   m_height = 0;
-  for (size_t n = 0; n < 256; ++n)
+  for (size_t n = 0; n < 256; ++n) {
     m_earliest_height[n] = 0;
+    m_earliest_height_cached[n] = false;
+  }
   m_dynamic_base_fee_estimate = 0;
   m_dynamic_base_fee_estimate_cached_height = 0;
   m_dynamic_base_fee_estimate_grace_blocks = 0;
@@ -219,7 +221,7 @@ boost::optional<std::string> NodeRPCProxy::get_earliest_height(uint8_t version, 
 {
   if (m_offline)
     return boost::optional<std::string>("offline");
-  if (m_earliest_height[version] == 0)
+  if (!m_earliest_height_cached[version])
   {
     cryptonote::COMMAND_RPC_HARD_FORK_INFO::request req_t = AUTO_VAL_INIT(req_t);
     cryptonote::COMMAND_RPC_HARD_FORK_INFO::response resp_t = AUTO_VAL_INIT(resp_t);
@@ -235,6 +237,7 @@ boost::optional<std::string> NodeRPCProxy::get_earliest_height(uint8_t version, 
     }
 
     m_earliest_height[version] = resp_t.earliest_height;
+    m_earliest_height_cached[version] = true;
   }
 
   earliest_height = m_earliest_height[version];

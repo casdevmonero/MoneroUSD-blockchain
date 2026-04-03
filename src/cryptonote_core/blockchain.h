@@ -303,6 +303,8 @@ namespace cryptonote
      */
     uint64_t get_current_blockchain_height() const;
 
+    bool has_fixed_difficulty() const { return m_fixed_difficulty != 0; }
+
     /**
      * @brief get the hash of the most recent block on the blockchain
      *

@@ -111,6 +111,9 @@ namespace cryptonote
     m_block_download_max_size = command_line::get_arg(vm, cryptonote::arg_block_download_max_size);
     m_sync_pruned_blocks = command_line::get_arg(vm, cryptonote::arg_sync_pruned_blocks);
 
+    // Auto-sync for established chains is handled in on_idle() because the
+    // blockchain DB may not be fully initialized at protocol init time.
+
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------
@@ -1743,6 +1746,27 @@ skip:
   template<class t_core>
   bool t_cryptonote_protocol_handler<t_core>::on_idle()
   {
+    // Auto-sync for established chains: if the node already has blocks and
+    // is not yet marked synchronized, mark it now.  This lets single-node
+    // and small networks begin mining immediately after a daemon restart
+    // without waiting for a peer handshake.  The normal peer-based sync
+    // path (on_connection_synchronized) still works independently.
+    if (!m_synchronized)
+    {
+      try
+      {
+        const uint64_t height = m_core.get_current_blockchain_height();
+        if (height > 1)
+        {
+          MGINFO_YELLOW("Established chain detected (height " << height
+            << ") — marking as synchronized");
+          m_synchronized = true;
+          m_core.on_synchronized();
+        }
+      }
+      catch (...) {}  // core may not be fully ready on first call
+    }
+
     m_idle_peer_kicker.do_call(boost::bind(&t_cryptonote_protocol_handler<t_core>::kick_idle_peers, this));
     m_standby_checker.do_call(boost::bind(&t_cryptonote_protocol_handler<t_core>::check_standby_peers, this));
     m_sync_search_checker.do_call(boost::bind(&t_cryptonote_protocol_handler<t_core>::update_sync_search, this));
@@ -2464,7 +2488,7 @@ skip:
   {
     bool val_expected = false;
     uint64_t current_blockchain_height = m_core.get_current_blockchain_height();
-    if(!m_core.is_within_compiled_block_hash_area(current_blockchain_height) && m_synchronized.compare_exchange_strong(val_expected, true))
+    if(m_synchronized.compare_exchange_strong(val_expected, true))
     {
       if ((current_blockchain_height > m_sync_start_height) && (m_sync_spans_downloaded > 0))
       {

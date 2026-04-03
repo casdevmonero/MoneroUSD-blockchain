@@ -690,6 +690,8 @@ namespace cryptonote
       */
      uint64_t get_target_blockchain_height() const;
 
+     bool has_fixed_difficulty() const { return m_blockchain_storage.has_fixed_difficulty(); }
+
      /**
       * @brief returns the newest hardfork version known to the blockchain
       *

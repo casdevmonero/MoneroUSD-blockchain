@@ -83,6 +83,7 @@ private:
 
   uint64_t m_height;
   uint64_t m_earliest_height[256];
+  bool m_earliest_height_cached[256];
   uint64_t m_dynamic_base_fee_estimate;
   uint64_t m_dynamic_base_fee_estimate_cached_height;
   uint64_t m_dynamic_base_fee_estimate_grace_blocks;

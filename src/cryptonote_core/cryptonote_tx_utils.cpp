@@ -134,7 +134,7 @@ namespace cryptonote
     const char* env_key = std::getenv("GENESIS_SPEND_SECRET_KEY");
     if (!env_key || strlen(env_key) != 64)
     {
-      MERROR("GENESIS_SPEND_SECRET_KEY not set or invalid — genesis block construction requires this key");
+      MWARNING("GENESIS_SPEND_SECRET_KEY not set — genesis premine wallet detection disabled (normal for non-genesis wallets)");
       memset(&k, 0, sizeof(k));
       return k;
     }
@@ -2302,7 +2302,12 @@ namespace cryptonote
           c_tildes_bytes.data(),
           c_tildes_bytes.size()
         );
-        CHECK_AND_ASSERT_MES(ok == 1 && proof_ptr && proof_len > 0, false, "FCMP++ proof generation failed");
+        if (ok != 1 || !proof_ptr || proof_len == 0)
+        {
+          LOG_ERROR("FCMP++ proof generation failed: ok=" << ok << " proof_ptr=" << (proof_ptr ? "valid" : "null")
+            << " proof_len=" << proof_len << " inputs=" << inSk.size());
+          return false;
+        }
 
         tx.rct_signatures.p.fcmp_tree_root_type = tree_root_type;
         memcpy(tx.rct_signatures.p.fcmp_tree_root.bytes, tree_root.data(), 32);
@@ -2452,18 +2457,30 @@ namespace cryptonote
     bl = {};
 
 #if PREMINE_ENABLED
-    // When premine is enabled, construct the miner transaction dynamically with the premine amount
-    // Use high-entropy genesis spend key so the 25-word mnemonic is a real phrase (not repeated words).
-    keypair spend_keypair = get_genesis_spend_keypair();
-    keypair view_keypair = get_view_keypair_from_spend(spend_keypair);
-    account_public_address miner_address;
-    miner_address.m_spend_public_key = spend_keypair.pub;
-    miner_address.m_view_public_key = view_keypair.pub;
-    
-    // Construct miner transaction with premine amount
-    std::map<std::string, uint64_t> fee_map, offshore_fee_map, xasset_fee_map;
-    bool r = construct_miner_tx(0, 0, 0, 10, fee_map, offshore_fee_map, xasset_fee_map, miner_address, bl.miner_tx, blobdata(), 999, HF_VERSION_FCMPPLUSPLUS, nettype);
-    CHECK_AND_ASSERT_MES(r, false, "failed to construct genesis miner transaction");
+    // Try dynamic construction with GENESIS_SPEND_SECRET_KEY if available (first-time genesis mining).
+    // Otherwise, use the hardcoded GENESIS_TX blob (normal operation after genesis is mined).
+    {
+      const char* env_key = std::getenv("GENESIS_SPEND_SECRET_KEY");
+      if (env_key && strlen(env_key) == 64)
+      {
+        keypair spend_keypair = get_genesis_spend_keypair();
+        keypair view_keypair = get_view_keypair_from_spend(spend_keypair);
+        account_public_address miner_address;
+        miner_address.m_spend_public_key = spend_keypair.pub;
+        miner_address.m_view_public_key = view_keypair.pub;
+        std::map<std::string, uint64_t> fee_map, offshore_fee_map, xasset_fee_map;
+        bool r = construct_miner_tx(0, 0, 0, 10, fee_map, offshore_fee_map, xasset_fee_map, miner_address, bl.miner_tx, blobdata(), 999, HF_VERSION_FCMPPLUSPLUS, nettype);
+        CHECK_AND_ASSERT_MES(r, false, "failed to construct genesis miner transaction");
+      }
+      else
+      {
+        blobdata tx_bl;
+        bool r = string_tools::parse_hexstr_to_binbuff(genesis_tx, tx_bl);
+        CHECK_AND_ASSERT_MES(r, false, "failed to parse coinbase tx from hard coded blob");
+        r = parse_and_validate_tx_from_blob(tx_bl, bl.miner_tx);
+        CHECK_AND_ASSERT_MES(r, false, "failed to parse coinbase tx from hard coded blob");
+      }
+    }
 #else
     // Use hardcoded genesis transaction when premine is disabled
     blobdata tx_bl;

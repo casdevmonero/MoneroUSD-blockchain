@@ -42,7 +42,10 @@
 #define CRYPTONOTE_MAX_TX_SIZE                          1000000
 #define CRYPTONOTE_MAX_TX_PER_BLOCK                     0x10000000
 #define CRYPTONOTE_PUBLIC_ADDRESS_TEXTBLOB_VER          0
-#define CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW            60
+// USDm: outputs are spendable immediately — no lock window.
+// Unlike XMR where coinbase outputs need 60 blocks to prevent reorg attacks,
+// USDm uses adaptive difficulty with mint authority signing so reorg risk is negligible.
+#define CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW            0
 #define CURRENT_TRANSACTION_VERSION                     9
 #define OFFSHORE_TRANSACTION_VERSION                    3
 #define POU_TRANSACTION_VERSION                         6
@@ -58,7 +61,8 @@ constexpr size_t FCMP_LAYER_TWO_LEN = 18;
 #define CRYPTONOTE_V2_POW_BLOCK_VERSION                 2
 #define CRYPTONOTE_V3_POW_BLOCK_VERSION                 3
 #define CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT              60*60*2
-#define CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE             10
+// USDm: all outputs are spendable immediately after 1 confirmation
+#define CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE             1
 
 // UNLOCK TIMES
 #define TX_V6_OFFSHORE_UNLOCK_BLOCKS                    21*720  // 21 day unlock time
@@ -110,11 +114,11 @@ constexpr size_t FCMP_LAYER_TWO_LEN = 18;
 // At 25% ratio with 0.5% swap fees, reserves grow ~800x faster than emission,
 // mathematically guaranteeing >150% collateralization at all times.
 // If on-chain fees are zero (e.g. day 1), emission is zero.
-#define EMISSION_FEE_WINDOW                             720    // blocks (~1 day at 120s)
+#define EMISSION_FEE_WINDOW                             1440   // blocks (~1 day at 60s target)
 #define EMISSION_FEE_RATIO_NUM                          1      // numerator: emit 1/4
 #define EMISSION_FEE_RATIO_DEN                          4      // denominator: of avg fees
-#define MAX_EMISSION_PER_BLOCK                          ((uint64_t)3000000000) // 30 USDm cap
-#define EMISSION_MIN_HEIGHT                             720    // no emission for first day
+#define MAX_EMISSION_PER_BLOCK                          ((uint64_t)10000000) // 0.1 USDm fixed block reward
+#define EMISSION_MIN_HEIGHT                             1440   // no emission for first day (at 60s blocks)
 
 #ifdef EXTENDED_VALIDATION
 #define MAX_VALIDATION_OVERRIDE_BLOCKS                  4320   // max duration for validation override (~6 days)
@@ -133,21 +137,11 @@ constexpr size_t FCMP_LAYER_TWO_LEN = 18;
 #define HAVEN_MAX_TX_VALUE                              ((uint64_t)15000000000000000000ull)
 #define HAVEN_MAX_TX_VALUE_TESTNET                      ((uint64_t)18000000000000000000ull)
 
-// MoneroUSD premine: initial USDm supply created in genesis blocks.
-// Amounts are derived from on-chain consensus and verified by all nodes.
-// Supply parameters are computed at compile time from consensus constants.
+// MoneroUSD premine: entire 5 billion USDm supply created in the genesis block.
 #define PREMINE_ENABLED                                 1
 #define PREMINE_BLOCKS                                  500
-
-// Consensus supply — derived from chain parameters; do not modify.
-// The supply seeds are verified against the genesis block commitment hash.
-#define _SUPPLY_SEED_A                                  ((uint64_t)0xABCD1234ULL)
-#define _SUPPLY_SEED_B                                  ((uint64_t)0x7E38DFCCULL)
-#define TOTAL_COIN_SUPPLY                               ((uint64_t)(_SUPPLY_SEED_A + _SUPPLY_SEED_B))
-#define GENESIS_SUPPLY                                  ((uint64_t)(TOTAL_COIN_SUPPLY * COIN))
-#define PREMINE_SUPPLY                                  GENESIS_SUPPLY
-#define PREMINE_PER_BLOCK                               ((uint64_t)(PREMINE_SUPPLY / PREMINE_BLOCKS))
-#define PREMINE_AMOUNT_USDM                             GENESIS_SUPPLY
+#define PREMINE_PER_BLOCK                               ((uint64_t)(10000000ULL * COIN))
+#define PREMINE_AMOUNT_USDM                             ((uint64_t)(5000000000ULL * COIN))
 
 // Native XMR->USDm mint: when 1, chain accepts AUTHORIZED_MINT txs (single txin_xmr_mint, single USDm vout). Mint authority signs over amount+recipient+nonce.
 #define ENABLE_XMR_MINT                                 1
@@ -168,14 +162,17 @@ constexpr size_t FCMP_LAYER_TWO_LEN = 18;
 #define PRICING_RECORD_VALID_BLOCKS                     10
 #define PRICING_RECORD_VALID_TIME_DIFF_FROM_BLOCK       120  // seconds
 
-#define DIFFICULTY_TARGET_V2                            120  // seconds
-#define DIFFICULTY_TARGET_V1                            120  // seconds - before first fork
+// USDm: 60-second block target for fast finality (stablecoin use case).
+// Combined with SPENDABLE_AGE=1, this gives ~60s effective finality.
+// Must be a multiple of 60 (static assertion in cryptonote_basic_impl.cpp).
+#define DIFFICULTY_TARGET_V2                            60   // seconds
+#define DIFFICULTY_TARGET_V1                            60   // seconds - before first fork
 #define DIFFICULTY_WINDOW                               60 // blocks
-#define DIFFICULTY_WINDOW_V2                            70 // blocks
+#define DIFFICULTY_WINDOW_V2                            90 // blocks (larger window for 60s target)
 #define DIFFICULTY_LAG                                  15  // !!!
 #define DIFFICULTY_CUT                                  6  // timestamps to cut after sorting
 #define DIFFICULTY_BLOCKS_COUNT                         DIFFICULTY_WINDOW
-#define DIFFICULTY_BLOCKS_COUNT_V2                      DIFFICULTY_WINDOW_V2
+#define DIFFICULTY_BLOCKS_COUNT_V2                      DIFFICULTY_WINDOW_V2  // must match window
 
 #define CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS_V1   DIFFICULTY_TARGET_V1 * CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS
 #define CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS_V2   DIFFICULTY_TARGET_V2 * CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS
@@ -315,7 +312,7 @@ constexpr size_t FCMP_LAYER_TWO_LEN = 18;
 #define HF_VERSION_CONVERSION_FEES_NOT_BURNT_FINAL    24
 #define HF_VERSION_OFFSHORE_FEES_V3             24
 #define HF_VERSION_MAX_CONV_TRANSACTION_FEE          24
-#define MAX_CONV_TRANSACTION_FEE                   ((uint64_t)10000000000000ull)
+#define MAX_CONV_TRANSACTION_FEE                   ((uint64_t)500000000000000000ull) // 5B USDm — no practical limit on transfers
 
 // Haven v4.2 definitions
 #define HF_VERSION_SUPPLY_AUDIT                 25
@@ -384,8 +381,7 @@ namespace config
   boost::uuids::uuid const NETWORK_ID = { {
       0x05 ,0x39, 0xF1, 0x70 , 0x61, 0x04 , 0x41, 0x60, 0x17, 0x32, 0x00, 0x81, 0x16, 0xA1, 0xA1, 0x10
     } };
-  // Genesis transaction — public on-chain data required for chain verification by all nodes
-  std::string const GENESIS_TX = "023c01ff0001ffffffffffff07020bf6522f9152fa26cd1fc5c022b1a9e13dab697f3acf4b4d0ca6950a867a194321011d92826d0656958865a035264725799f39f6988faa97d532f972895de849496d00";
+  std::string const GENESIS_TX = "0901ff00018080c89d9deb96f80608fc79dd2db421afe041e751da18ada066a8160e4e683607a1e0e1b06aba1e2d9aadf505843052ebc4df6288d362c02b4440a221c9187e15e803afe22373eca48fcaba9798516dad0338d06e106d76a201937ace4c91539e617d89287306a392b1045553446d3c0000eb2101c9a3f86aae465f0e56513864510f3997561fa2c9e85ea21dc2292309f3cd602200000000";
   uint32_t const GENESIS_NONCE = 10000;
 
   // Hash domain separators
@@ -442,6 +438,10 @@ namespace config
         0x05 ,0x39, 0xF1, 0x70 , 0x61, 0x04 , 0x41, 0x60, 0x17, 0x32, 0x00, 0x81, 0x16, 0xA1, TESTNET_VERSION, 0x11
       } };
     std::string const GENESIS_TX = "023c01ff0001ffffffffffff07020bf6522f9152fa26cd1fc5c022b1a9e13dab697f3acf4b4d0ca6950a867a194321011d92826d0656958865a035264725799f39f6988faa97d532f972895de849496d00";
+    // 15M premine
+    //std::string const GENESIS_TX = "023c01ff00018080f0f6ec90ad95d00102d12e955cf07c7569e9678afeb9c879c04f5e5850987c83feaea7afdb462b8f832101f352146306f0d841fed393dda5ad977cb009430442394c72f1fae952af0bb24700";
+    // 18.4M premine
+    //std::string const GENESIS_TX = "023c01ff00018cffffffffffffffff0102fa999deaf77e7666b1ce36a81107ee39ad51cd70eb5f99d3ce9d0afc40fb4ac821016f8a067f6f8b2988fa71c665f05521616f309a49b345af21633718507b73e83a00";
     uint32_t const GENESIS_NONCE = 10001;
 
     std::string const GOVERNANCE_WALLET_ADDRESS = "MoJebQi6iKhfjn5ekgWjdB5h23A4E7qd5Fbg3ByAcFcYKS9REBNdPkPS3PpwPWuz2xE7aVPN6uDgE2DFrg6qMPweUQLhuZv";
@@ -469,6 +469,7 @@ namespace config
         0x05 ,0x39, 0xF1, 0x70 , 0x61, 0x04 , 0x41, 0x60, 0x17, 0x32, 0x00, 0x81, 0x16, 0xA1, STAGENET_VERSION, 0x12
       } };
     std::string const GENESIS_TX = "023c01ff0001ffffffffffff07020bf6522f9152fa26cd1fc5c022b1a9e13dab697f3acf4b4d0ca6950a867a194321011d92826d0656958865a035264725799f39f6988faa97d532f972895de849496d00";
+    //std::string const GENESIS_TX = "013c01ff0001ffffffffffff0f029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd0880712101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
 
     std::string const GOVERNANCE_WALLET_ADDRESS = "MoJebQi6iKhfjn5ekgWjdB5h23A4E7qd5Fbg3ByAcFcYKS9REBNdPkPS3PpwPWuz2xE7aVPN6uDgE2DFrg6qMPweUQLhuZv";
     std::string const GOVERNANCE_WALLET_ADDRESS_MULTI = "MoJebQi6iKhfjn5ekgWjdB5h23A4E7qd5Fbg3ByAcFcYKS9REBNdPkPS3PpwPWuz2xE7aVPN6uDgE2DFrg6qMPweUQLhuZv";

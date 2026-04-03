@@ -942,10 +942,8 @@ difficulty_type Blockchain::get_difficulty_for_next_block()
 
   int done = 0;
   ss << "get_difficulty_for_next_block: height " << m_db->height() << std::endl;
-  if (m_fixed_difficulty)
-  {
-    return m_db->height() ? m_fixed_difficulty : 1;
-  }
+  // m_fixed_difficulty is now a MINIMUM floor, not a fixed override.
+  // LWMA calculates adaptive difficulty; result is clamped to the floor.
 
 start:
   difficulty_type D = 0;
@@ -1095,7 +1093,13 @@ start:
     MGINFO("START DUMP");
     MGINFO(ss.str());
     MGINFO("END DUMP");
-    MGINFO("Please send moneromooo on Libera.Chat the contents of this log, from a couple dozen lines before START DUMP to END DUMP");
+  }
+  // Apply minimum difficulty floor from --fixed-difficulty flag.
+  // This ensures the chain always has at least a baseline difficulty
+  // while still adapting to actual network hashrate via LWMA.
+  if (m_fixed_difficulty && diff < m_fixed_difficulty)
+  {
+    diff = m_fixed_difficulty;
   }
   return diff;
 }
@@ -1404,10 +1408,7 @@ bool Blockchain::switch_to_alternative_blockchain(std::list<block_extended_info>
 // an alternate chain.
 difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std::list<block_extended_info>& alt_chain, block_extended_info& bei) const
 {
-  if (m_fixed_difficulty)
-  {
-    return m_db->height() ? m_fixed_difficulty : 1;
-  }
+  // m_fixed_difficulty is a floor, not a fixed override (see get_difficulty_for_next_block)
 
   LOG_PRINT_L3("Blockchain::" << __func__);
   std::vector<uint64_t> timestamps;
@@ -1474,11 +1475,16 @@ difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std:
   size_t target = get_ideal_hard_fork_version(bei.height) < 2 ? DIFFICULTY_TARGET_V1 : DIFFICULTY_TARGET_V2;
 
   // calculate the difficulty target for the block and return it
+  difficulty_type diff;
   if (version == 1) {
-  return next_difficulty(timestamps, cumulative_difficulties, target);
+    diff = next_difficulty(timestamps, cumulative_difficulties, target);
   } else {
-    return next_difficulty_v2(timestamps, cumulative_difficulties, target);
+    diff = next_difficulty_v2(timestamps, cumulative_difficulties, target);
   }
+  // Apply minimum difficulty floor
+  if (m_fixed_difficulty && diff < m_fixed_difficulty)
+    diff = m_fixed_difficulty;
+  return diff;
 }
 //------------------------------------------------------------------
 // This function does a sanity check on basic things that all miner

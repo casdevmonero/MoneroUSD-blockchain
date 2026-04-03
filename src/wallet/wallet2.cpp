@@ -11584,9 +11584,9 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_2(
   // throw if attempting a transaction with no money
   THROW_WALLET_EXCEPTION_IF(needed_money == 0, error::zero_amount);
 
-  // HF28+: flat 0.5% percentage-based fee (amount / 200)
+  // HF28+: flat 0.1% percentage-based fee (amount / 1000)
   const bool use_percentage_fee = (hf_version >= HF_VERSION_FCMPPLUSPLUS);
-  const uint64_t percentage_fee = use_percentage_fee ? std::max<uint64_t>(needed_money / 200, MINIMUM_FEE_USDM) : 0;
+  const uint64_t percentage_fee = use_percentage_fee ? std::max<uint64_t>(needed_money / 1000, MINIMUM_FEE_USDM) : 0;
 
   // Calculate the conversion fee
   uint64_t offshore_fee = (tx_type == tt::OFFSHORE) ? cryptonote::get_offshore_fee(dsts, unlock_time_adj - current_height - 1, hf_version)

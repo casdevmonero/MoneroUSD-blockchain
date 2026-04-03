@@ -125,22 +125,6 @@ compile_commands.json
 
 # Extended validation module (private — not for public distribution)
 src/cryptonote_core/extended_validation.cpp
-
-# Sensitive runtime data
-stagenet-data/
-genesis/
-.shared-ringdb/
-*.mdb
-*.keys
-*.wallet
-*.pid
-rpc_ssl.key
-rpc_ssl.crt
-*.pem
-*.p12
-.env
-.env.*
-.claude/
 build-linux/
 build-vps/
-target/
+stagenet-data/

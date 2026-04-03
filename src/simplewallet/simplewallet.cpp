@@ -6189,6 +6189,7 @@ bool simple_wallet::run_node(const std::vector<std::string>& /*args*/)
   message_writer() << tr("Node address: ") << node_addr;
 
   std::vector<std::string> candidates = {
+    "/Users/Robert/MoneroUSD/haven-main/build/Darwin/master/release/bin/USDmd",
     "/opt/homebrew/bin/USDmd",
     "/usr/local/bin/USDmd",
     "/usr/bin/USDmd"

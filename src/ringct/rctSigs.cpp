@@ -2013,8 +2013,11 @@ namespace rct {
         }
       }
 
-      //Txn fee sanity check
-      CHECK_AND_ASSERT_MES(version < HF_VERSION_MAX_CONV_TRANSACTION_FEE || rv.txnFee < MAX_CONV_TRANSACTION_FEE, false, "Transaction fee too high! rejecting tx..");
+      //Txn fee sanity check — only enforce MAX_CONV_TRANSACTION_FEE for conversion txs.
+      // Same-asset transfers use per-byte fees which are naturally bounded by tx weight.
+      if (is_conversion_type_tx) {
+        CHECK_AND_ASSERT_MES(version < HF_VERSION_MAX_CONV_TRANSACTION_FEE || rv.txnFee < MAX_CONV_TRANSACTION_FEE, false, "Transaction fee too high! rejecting tx..");
+      }
 
       if (is_transfer_type_tx) {
         CHECK_AND_ASSERT_MES(pr.empty(), false, "Pricing record found for a transfer! rejecting tx..");
@@ -2023,7 +2026,6 @@ namespace rct {
         if (version < HF_VERSION_BURN) {
           CHECK_AND_ASSERT_MES(amount_burnt==0, false, "amount_burnt found for a transfer tx! rejecting tx.. ");
         }
-        CHECK_AND_ASSERT_MES(version < HF_VERSION_MAX_CONV_TRANSACTION_FEE || rv.txnFee < MAX_CONV_TRANSACTION_FEE, false, "Transaction fee too high! rejecting tx..");
       }
 
       if (strSource == strDest) {
