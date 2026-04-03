@@ -177,3 +177,6 @@ genesis_testnet
 test_premine
 test_premine.keys
 tmp_*
+
+# FCMP++ build artifacts (large compiled Rust libs)
+external/fcmp_ffi/target/
